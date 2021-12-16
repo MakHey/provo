@@ -1,48 +1,50 @@
-const hourEl = document.querySelector('.hour')
-const minuteEl = document.querySelector('.minute')
-const secondEl = document.querySelector('.second')
-const timeEl = document.querySelector('.time')
-const dateEl = document.querySelector('.date')
-const toggle = document.querySelector('.toggle')
+const progress = document.getElementById('progress')
+const prev = document.getElementById('prev')
+const next = document.getElementById('next')
+const circles = document.querySelectorAll('.circle')
+const content = document.querySelectorAll('.content-box')
 
-const days = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
-const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+let currentActive = 1
 
-toggle.addEventListener('click', (e) => {
-    const html = document.querySelector('html')
-    if (html.classList.contains('dark')) {
-        html.classList.remove('dark')
-        e.target.innerHTML = 'Dark mode'
-    } else {
-        html.classList.add('dark')
-        e.target.innerHTML = 'Light mode'
+next.addEventListener('click', () => {
+    currentActive++
+    
+    if(currentActive > circles.length) {
+      currentActive = circles.length
     }
+
+    update()
 })
 
-function setTime() {
-    const time = new Date();
-    const month = time.getMonth()
-    const day = time.getDay()
-    const date = time.getDate()
-    const hours = time.getHours()
-    const hoursForClock = hours >= 13 ? hours % 12 : hours;
-    const minutes = time.getMinutes()
-    const seconds = time.getSeconds()
-    const ampm = hours >= 12 ? 'PM' : 'AM'
+prev.addEventListener('click', () => {
+    currentActive--
 
-    hourEl.style.transform = `translate(-50%, -100%) rotate(${scale(hoursForClock, 0, 12, 0, 360)}deg)`
-    minuteEl.style.transform = `translate(-50%, -100%) rotate(${scale(minutes, 0, 60, 0, 360)}deg)`
-    secondEl.style.transform = `translate(-50%, -100%) rotate(${scale(seconds, 0, 60, 0, 360)}deg)`
+    if(currentActive < 1) {
+        currentActive = 1
+    }
 
-    timeEl.innerHTML = `${hoursForClock}:${minutes < 10 ? `0${minutes}` : minutes} ${ampm}`
-    dateEl.innerHTML = `${days[day]}, ${months[month]} <span class="circle">${date}</span>`
+    update()
+})
+
+function update() {
+    circles.forEach((circle, idx) => {
+        if(idx < currentActive) {
+            circle.classList.add('active')
+        } else {
+            circle.classList.remove('active')
+        }
+    })
+
+    const actives = document.querySelectorAll('.active')
+
+    progress.style.width = (actives.length - 1) / (circles.length - 1) * 100 + '%'
+
+    if(currentActive === 1) {
+        prev.disabled = true
+    } else if(currentActive === circles.length) {
+        next.disabled = true
+    } else {
+        prev.disabled = false
+        next.disabled = false
+    }
 }
-
-// StackOverflow https://stackoverflow.com/questions/10756313/javascript-jquery-map-a-range-of-numbers-to-another-range-of-numbers
-const scale = (num, in_min, in_max, out_min, out_max) => {
-    return (num - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
-}
-
-setTime()
-
-setInterval(setTime, 1000)
